@@ -1,0 +1,44 @@
+POST http://localhost:5000/faculty-api/users
+Content-Type: application/json
+
+{
+    "username":"saketh",
+    "password":"saketh",
+    "email":"saketh@gmail.com"
+}
+
+### login
+POST http://localhost:5000/faculty-api/login
+Content-Type: application/json
+
+{
+    "username":"saketh",
+    "password":"saketh"
+}
+
+###upload
+POST http://localhost:5000/faculty-api/upload
+Content-Type: application/json
+
+{
+    "Name": "Nirmayi Padachala ",
+    "Roll Number": "19071A05P0",
+    "Branch": "CSE",
+    "Section": "D",
+    "Mobile Number": 9618041313,
+    "Mail Id": "nirmayi987@gmail.com",
+    "Internship Offered Company Name": "Nichebit Softech Pvt Ltd",
+    "Internship Offered Company Address": "1101/A, Manjeera Trinity Corporate, JNTU - Hitech City Road, Kukatpally, Hyderabad, Telangana 500072",
+    "Monthly Stipend": 10000,
+    "Duration": "3 months",
+    "Starting Date": "1/08/2022",
+    "Ending Date":"31/10/22",
+    "Name of the HR or Lead": "Nusrath",
+    "Mail Id of the HR or Lead": "hr@nichebit.com",
+    "Website of the Internship Offered Company": "https://www.nichebit.com/",
+    "Role of the Internship": "Web Developer",
+    "Internship Offer Letter" :"https://drive.google.com/open?id=1O8cfQXt0ADpu7CiUD8V8ZlfFN97_xAay"
+}
+
+###get students details
+GET http://localhost:5000/faculty-api/fetch
