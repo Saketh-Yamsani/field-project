@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import "./signup.css";
-
+import 'bootstrap/dist/css/bootstrap.css';
 function Signup() {
     const { register, handleSubmit, formState: { errors } } = useForm();
     const [err, setErr] = useState("");

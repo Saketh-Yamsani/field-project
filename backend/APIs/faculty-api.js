@@ -71,10 +71,11 @@ facultyApp.post(
 // Add a new POST route to store multiple documents into studentsdatacollection
 facultyApp.post(
   "/upload",
-  verifyToken,
   expressAsyncHandler(async (req, res) => {
     try {
       const studentDataArray = req.body;
+      console.log(studentDataArray)
+      console.log("frgdh")
       await studentsdatacollection.insertMany(studentDataArray);
       res.send({ message: "Student data stored successfully" });
     } catch (error) {
@@ -87,7 +88,6 @@ facultyApp.post(
 // Route to fetch all student data
 facultyApp.get(
   "/fetch",
-  verifyToken,
   expressAsyncHandler(async (req, res) => {
     try {
       const studentsData = await studentsdatacollection.find().toArray();
@@ -102,7 +102,6 @@ facultyApp.get(
 // Route to fetch filtered/sorted student data
 facultyApp.get(
   "/fetch-filtered",
-  verifyToken,
   expressAsyncHandler(async (req, res) => {
     try {
       const { sortField, sortOrder, minSalary, maxSalary, duration, search } = req.query;
