@@ -71,6 +71,7 @@ facultyApp.post(
 // Add a new POST route to store multiple documents into studentsdatacollection
 facultyApp.post(
   "/upload",
+  verifyToken,
   expressAsyncHandler(async (req, res) => {
     try {
       console.log('Hello')
