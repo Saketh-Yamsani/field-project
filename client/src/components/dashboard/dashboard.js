@@ -12,9 +12,6 @@ function Dashboard() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
-    const [minSalary, setMinSalary] = useState('');
-    const [maxSalary, setMaxSalary] = useState('');
-    const [duration, setDuration] = useState('');
     const [isUploaded, setIsUploaded] = useState(false);
 
     const history = useNavigate();
@@ -50,11 +47,12 @@ function Dashboard() {
             console.log(jsonData);
 
             try {
-                await axios.post("http://localhost:5000/faculty-api/upload", jsonData, {
+                const res=await axios.post("http://localhost:5000/faculty-api/upload", jsonData, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 });
+                console.log(res.data)
                 setIsUploaded(true);
                 fetchData();
             } catch (error) {
@@ -72,6 +70,7 @@ function Dashboard() {
                     Authorization: `Bearer ${token}`
                 }
             });
+            console.log(response.data)
             setStudentsData(response.data);
             console.log("Students data:", response.data);
         } catch (error) {
@@ -86,9 +85,6 @@ function Dashboard() {
                 params: {
                     sortField,
                     sortOrder,
-                    minSalary,
-                    maxSalary,
-                    duration,
                     search: searchTerm
                 },
                 headers: {
@@ -113,23 +109,17 @@ function Dashboard() {
     };
 
     const handleSort = (field) => {
+        const order = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
         setSortField(field);
-    };
-
-    const handleSortOrder = (order) => {
         setSortOrder(order);
-    };
 
-    const handleFilterMinSalary = (min) => {
-        setMinSalary(min);
-    };
+        const sortedData = [...studentsData].sort((a, b) => {
+            if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
+            if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
+            return 0;
+        });
 
-    const handleFilterMaxSalary = (max) => {
-        setMaxSalary(max);
-    };
-
-    const handleFilterDuration = (duration) => {
-        setDuration(duration);
+        setStudentsData(sortedData);
     };
 
     const handleSignOut = () => {
@@ -162,24 +152,6 @@ function Dashboard() {
                                 <>
                                     {/* SearchBar component */}
                                     <SearchBar searchTerm={searchTerm} setSearchTerm={handleSearch} />
-                                    <div className="mb-3">
-                                        <select className="form-control" value={sortField} onChange={(e) => handleSort(e.target.value)}>
-                                            <option value="">Sort By</option>
-                                            <option value="Name">Name</option>
-                                            <option value="Stipend">Stipend</option>
-                                            <option value="Duration">Duration</option>
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <select className="form-control" value={sortOrder} onChange={(e) => handleSortOrder(e.target.value)}>
-                                            <option value="asc">Ascending</option>
-                                            <option value="desc">Descending</option>
-                                        </select>
-                                    </div>
-                                    <div className="d-flex justify-content-between mb-3">
-                                        <button className="btn btn-primary" onClick={fetchFilteredData}>Apply Filters</button>
-                                        <button className="btn btn-secondary" onClick={fetchData}>Get All Details</button>
-                                    </div>
                                 </>
                             )}
                         </div>
@@ -193,25 +165,22 @@ function Dashboard() {
                         <table className="table table-striped">
                             <thead>
                                 <tr>
-                                    {studentsData.length > 0 && Object.keys(studentsData[0]).map((key) => (
-                                        <th key={key}>{key}</th>
+                                    {Object.keys(studentsData[0] || {}).map((key) => (
+                                        <th key={key} onClick={() => handleSort(key)}>
+                                            {key}
+                                            {sortField === key && (sortOrder === 'asc' ? ' ▲' : ' ▼')}
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {studentsData.length > 0 ? (
-                                    studentsData.map((student, index) => (
-                                        <tr key={index}>
-                                            {Object.values(student).map((value, idx) => (
-                                                <td key={idx}>{value}</td>
-                                            ))}
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={Object.keys(studentsData[0] || {}).length}>No data found</td>
+                                {studentsData.map((student, index) => (
+                                    <tr key={index}>
+                                        {Object.values(student).map((value, idx) => (
+                                            <td key={idx}>{value}</td>
+                                        ))}
                                     </tr>
-                                )}
+                                ))}
                             </tbody>
                         </table>
                     </div>

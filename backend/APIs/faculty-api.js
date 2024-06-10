@@ -73,6 +73,7 @@ facultyApp.post(
   "/upload",
   expressAsyncHandler(async (req, res) => {
     try {
+      console.log('Hello')
       const studentDataArray = req.body;
       if (!Array.isArray(studentDataArray)) {
         return res.status(400).send({ message: 'Invalid data format. Expected an array of objects.' });

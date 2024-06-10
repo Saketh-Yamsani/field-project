@@ -29,7 +29,6 @@ app.use(exp.json())
 
 const facultyApp=require('./APIs/faculty-api')
 
-
 app.use('/faculty-api',facultyApp)
 
 
