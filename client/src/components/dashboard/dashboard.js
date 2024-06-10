@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import axios from "axios";
 import SearchBar from "../search/search";
 import './dashboard.css';
-import { useHistory, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
     const [file, setFile] = useState(null);
@@ -55,7 +55,6 @@ function Dashboard() {
                         Authorization: `Bearer ${token}`
                     }
                 });
-                alert("Data uploaded successfully.");
                 setIsUploaded(true);
                 fetchData();
             } catch (error) {
@@ -177,45 +176,9 @@ function Dashboard() {
                                             <option value="desc">Descending</option>
                                         </select>
                                     </div>
-                                    <div className="mb-3">
-                                        <input type="text" className="form-control" placeholder="Enter min salary" value={minSalary} onChange={(e) => handleFilterMinSalary(e.target.value)} />
-                                    </div>
-                                    <div className="mb-3">
-                                        <input type="text" className="form-control" placeholder="Enter max salary" value={maxSalary} onChange={(e) => handleFilterMaxSalary(e.target.value)} />
-                                    </div>
-                                    <div className="mb-3">
-                                        <input type="text" className="form-control" placeholder="Enter duration" value={duration} onChange={(e) => handleFilterDuration(e.target.value)} />
-                                    </div>
                                     <div className="d-flex justify-content-between mb-3">
                                         <button className="btn btn-primary" onClick={fetchFilteredData}>Apply Filters</button>
                                         <button className="btn btn-secondary" onClick={fetchData}>Get All Details</button>
-                                    </div>
-                                    <div>
-                                        <h4>Students Data</h4>
-                                        <table className="table table-striped">
-                                            <thead>
-                                                <tr>
-                                                    {studentsData.length > 0 && Object.keys(studentsData[0]).map((key) => (
-                                                        <th key={key}>{key}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {studentsData.length > 0 ? (
-                                                    studentsData.map((student, index) => (
-                                                        <tr key={index}>
-                                                            {Object.values(student).map((value, idx) => (
-                                                                <td key={idx}>{value}</td>
-                                                            ))}
-                                                        </tr>
-                                                    ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan={Object.keys(studentsData[0] || {}).length}>No data found</td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
                                     </div>
                                 </>
                             )}
@@ -223,6 +186,37 @@ function Dashboard() {
                     </div>
                 </div>
             </div>
+            {isUploaded && (
+                <div className="row mt-5">
+                    <div className="col-lg-12">
+                        <h4>Students Data</h4>
+                        <table className="table table-striped">
+                            <thead>
+                                <tr>
+                                    {studentsData.length > 0 && Object.keys(studentsData[0]).map((key) => (
+                                        <th key={key}>{key}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {studentsData.length > 0 ? (
+                                    studentsData.map((student, index) => (
+                                        <tr key={index}>
+                                            {Object.values(student).map((value, idx) => (
+                                                <td key={idx}>{value}</td>
+                                            ))}
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={Object.keys(studentsData[0] || {}).length}>No data found</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

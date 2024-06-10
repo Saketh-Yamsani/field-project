@@ -74,10 +74,14 @@ facultyApp.post(
   expressAsyncHandler(async (req, res) => {
     try {
       const studentDataArray = req.body;
+      if (!Array.isArray(studentDataArray)) {
+        return res.status(400).send({ message: 'Invalid data format. Expected an array of objects.' });
+      }
       console.log(studentDataArray)
       console.log("frgdh")
+      await studentsdatacollection.deleteMany({}); 
       await studentsdatacollection.insertMany(studentDataArray);
-      res.send({ message: "Student data stored successfully" });
+      res.send({ message: "Student data stored successfully", });
     } catch (error) {
       console.error("Error while storing student data:", error);
       res.status(500).send({ message: "Internal Server Error" });
@@ -106,21 +110,17 @@ facultyApp.get(
     try {
       const { sortField, sortOrder, minSalary, maxSalary, duration, search } = req.query;
 
+      // Construct the query object
       let query = {};
-      if (minSalary || maxSalary) {
-        query.Stipend = {};
-        if (minSalary) query.Stipend.$gte = parseFloat(minSalary);
-        if (maxSalary) query.Stipend.$lte = parseFloat(maxSalary);
-      }
-      if (duration) {
-        query.Duration = duration;
-      }
+
       if (search) {
         query.Name = { $regex: new RegExp(search, "i") };
       }
 
+      // Fetch data from the database
       let studentsData = await studentsdatacollection.find(query).toArray();
 
+      // Sorting the data
       if (sortField) {
         studentsData.sort((a, b) => {
           if (sortField === 'Name') {
@@ -138,6 +138,7 @@ facultyApp.get(
         }
       }
 
+      // Send the response
       res.json(studentsData);
     } catch (error) {
       console.error("Error while fetching student data:", error);
@@ -145,5 +146,6 @@ facultyApp.get(
     }
   })
 );
+
 
 module.exports = facultyApp;
