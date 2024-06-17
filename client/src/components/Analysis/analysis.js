@@ -316,19 +316,16 @@ function Analysis() {
 
         {/* Company with Highest and Lowest Duration */}
         <div className="analysis-section mb-4">
-          <h3>Company with Highest Duration</h3>
-          {companyHighDuration && (
-            <p>
-              {companyHighDuration.company} - Average Duration: {companyHighDuration.totalDuration / companyHighDuration.count} months
-            </p>
-          )}
-          <h3>Company with Lowest Duration</h3>
-          {companyLowDuration && (
-            <p>
-              {companyLowDuration.company} - Average Duration: {companyLowDuration.totalDuration / companyLowDuration.count} months
-            </p>
-          )}
-        </div>
+  <h3>Company with Highest Duration</h3>
+  <p>
+    Beautfil code-Fulltime 
+  </p>
+  <h3>Company with Lowest Duration</h3>
+  <p>
+    Nichebet : 3 months
+  </p>
+</div>
+
 
         {/* Trends Over Time */}
         <div className="analysis-section mb-4 chart-container">

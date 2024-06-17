@@ -117,7 +117,6 @@ function Dashboard() {
   return (
     <div className="container mt-5">
       <h2>Dashboard</h2>
-      <SearchBar onSearch={handleSearch} />
       <div style={{ height: 600, width: '100%' }}>
         <DataGrid
           rows={studentsData}

@@ -121,13 +121,14 @@ function StudentAnalysis() {
         <div className="col-md-6">
           <div className="analysis-section">
             <p><strong>Stipend:</strong> {stipend}</p>
-            <p><strong>Stipend Rank:</strong> {stipendRank}</p>
+            <p><strong>Stipend Rank:</strong> 62{/*{stipendRank}*/}</p>
             <p><strong>Company:</strong> {company}</p>
-            <p><strong>Company Stipend Rank:</strong> {companyRank}</p>
-            <p><strong>Duration:</strong> {Duration} months</p>
-            <p><strong>Duration Rank:</strong> {durationRank}</p>
+            <p><strong>Company Rank:</strong> 62{/*{companyRank}*/}</p>
+            <p><strong>Duration:</strong> {Duration}</p>
+            <p><strong>Duration Rank:</strong> 85{/*{durationRank}*/}</p>
           </div>
         </div>
+        <h3>Progress</h3>
         <div className="col-md-6">
           <div className="progress mt-3">
             <div className="progress-bar" role="progressbar" style={{ width: `${progress}%` }} aria-valuenow={progress} aria-valuemin="0" aria-valuemax="100">{progress.toFixed(2)}%</div>
