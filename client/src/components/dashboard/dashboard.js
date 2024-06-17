@@ -1,193 +1,133 @@
-import React, { useState, useEffect } from "react";
-import * as XLSX from "xlsx";
-import axios from "axios";
-import SearchBar from "../search/search";
-import './dashboard.css';
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import SearchBar from '../search/search';
+import { useNavigate } from 'react-router-dom';
+import { DataGrid } from '@mui/x-data-grid';
+import debounce from 'lodash/debounce';
 
 function Dashboard() {
-    const [file, setFile] = useState(null);
-    const [studentsData, setStudentsData] = useState([]);
-    const [token, setToken] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [sortField, setSortField] = useState('');
-    const [sortOrder, setSortOrder] = useState('asc');
-    const [isUploaded, setIsUploaded] = useState(false);
+  const [studentsData, setStudentsData] = useState([]);
+  const [token, setToken] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [columns, setColumns] = useState([]);
+  const navigate = useNavigate();
 
-    const history = useNavigate();
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+    }
+    fetchStudentsData(); // Fetch initial data
+  }, []);
 
-    useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        if (storedToken) {
-            setToken(storedToken);
+  useEffect(() => {
+    // Debounced search effect
+    const debouncedFetchFilteredData = debounce(() => {
+      if (searchTerm !== '') {
+        fetchFilteredData();
+      } else {
+        fetchStudentsData();
+      }
+    }, 300);
+
+    debouncedFetchFilteredData();
+
+    return () => {
+      debouncedFetchFilteredData.cancel();
+    };
+  }, [searchTerm]); // Re-run effect when searchTerm changes
+
+  const fetchStudentsData = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/faculty-api/fetch", {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-    }, []);
+      });
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-    };
+      const filteredData = response.data.map(student => {
+        const { _id, Timestamp, ...rest } = student;
+        return rest;
+      });
 
-    const handleUpload = async () => {
-        if (!file) return alert("Please select a file first.");
+      setStudentsData(filteredData);
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const arrayBuffer = e.target.result;
-            const data = new Uint8Array(arrayBuffer);
-            const workbook = XLSX.read(data, { type: "array" });
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
-            let jsonData = XLSX.utils.sheet_to_json(sheet);
+      if (filteredData.length > 0) {
+        const firstRow = filteredData[0];
+        const cols = Object.keys(firstRow).map((key) => ({
+          field: key,
+          headerName: key.toUpperCase(),
+          width: 150,
+          sortable: true,
+          filterable: true,
+        })).filter(col => col.field !== 'Timestamp' && col.field !== '_id');
 
-            jsonData = jsonData.map(entry => {
-                delete entry.Timestamp;
-                return entry;
-            });
+        setColumns(cols);
+      }
+    } catch (error) {
+      console.error("Error fetching student details:", error);
+      alert("Failed to fetch student details.");
+    }
+  };
 
-            console.log(jsonData);
-
-            try {
-                const res=await axios.post("http://localhost:5000/faculty-api/upload", jsonData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                console.log(res.data)
-                setIsUploaded(true);
-                fetchData();
-            } catch (error) {
-                console.error("Error uploading data:", error);
-                alert("Failed to upload data.");
-            }
-        };
-        reader.readAsArrayBuffer(file);
-    };
-
-    const fetchData = async () => {
-        try {
-            const response = await axios.get("http://localhost:5000/faculty-api/fetch", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            console.log(response.data)
-            setStudentsData(response.data);
-            console.log("Students data:", response.data);
-        } catch (error) {
-            console.error("Error getting student details:", error);
-            alert("Failed to get student details.");
+  const fetchFilteredData = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/faculty-api/fetch-filtered", {
+        params: {
+          search: searchTerm
+        },
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-    };
+      });
 
-    const fetchFilteredData = async () => {
-        try {
-            const response = await axios.get("http://localhost:5000/faculty-api/fetch-filtered", {
-                params: {
-                    sortField,
-                    sortOrder,
-                    search: searchTerm
-                },
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setStudentsData(response.data);
-            console.log("Filtered students data:", response.data);
-        } catch (error) {
-            console.error("Error getting filtered student details:", error);
-            alert("Failed to get filtered student details.");
-        }
-    };
+      const filteredData = response.data.map(student => {
+        const { _id, Timestamp, ...rest } = student;
+        return rest;
+      });
 
-    const handleSearch = (term) => {
-        setSearchTerm(term);
-        if (term === "") {
-            fetchData(); // Fetch all data if search term is empty
-        } else {
-            fetchFilteredData(); // Fetch filtered data if search term is not empty
-        }
-    };
+      setStudentsData(filteredData);
 
-    const handleSort = (field) => {
-        const order = sortField === field && sortOrder === 'asc' ? 'desc' : 'asc';
-        setSortField(field);
-        setSortOrder(order);
+      if (filteredData.length > 0) {
+        const firstRow = filteredData[0];
+        const cols = Object.keys(firstRow).map((key) => ({
+          field: key,
+          headerName: key.toUpperCase(),
+          width: 150,
+          sortable: true,
+          filterable: true,
+        })).filter(col => col.field !== 'Timestamp' && col.field !== '_id');
 
-        const sortedData = [...studentsData].sort((a, b) => {
-            if (a[field] < b[field]) return order === 'asc' ? -1 : 1;
-            if (a[field] > b[field]) return order === 'asc' ? 1 : -1;
-            return 0;
-        });
+        setColumns(cols);
+      }
+    } catch (error) {
+      console.error("Error getting filtered student details:", error);
+      alert("Failed to get filtered student details.");
+    }
+  };
 
-        setStudentsData(sortedData);
-    };
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+  };
 
-    const handleSignOut = () => {
-        localStorage.removeItem('token');
-        history('/signin'); // Adjust the path to your sign-in page
-    };
+  const handleRowClick = (params) => {
+    navigate(`/student/${params.row.id}`); // Redirect to analysis page
+  };
 
-    return (
-        <div className="container">
-            <div className="row justify-content-between mt-3">
-                <div className="col-lg-10">
-                    <h2>Dashboard</h2>
-                </div>
-                <div className="col-lg-2 text-end">
-                    <button className="btn btn-danger" onClick={handleSignOut}>Sign Out</button>
-                </div>
-            </div>
-            <div className="row justify-content-center mt-5">
-                <div className="col-lg-10">
-                    <div className="card shadow">
-                        <div className="card-body">
-                            {!isUploaded ? (
-                                <div className="mb-4">
-                                    <input type="file" className="form-control" onChange={handleFileChange} />
-                                    <div className="text-end mb-3 mt-3">
-                                        <button className="btn btn-primary" onClick={handleUpload}>Upload</button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    {/* SearchBar component */}
-                                    <SearchBar searchTerm={searchTerm} setSearchTerm={handleSearch} />
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {isUploaded && (
-                <div className="row mt-5">
-                    <div className="col-lg-12">
-                        <h4>Students Data</h4>
-                        <table className="table table-striped">
-                            <thead>
-                                <tr>
-                                    {Object.keys(studentsData[0] || {}).map((key) => (
-                                        <th key={key} onClick={() => handleSort(key)}>
-                                            {key}
-                                            {sortField === key && (sortOrder === 'asc' ? ' ▲' : ' ▼')}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {studentsData.map((student, index) => (
-                                    <tr key={index}>
-                                        {Object.values(student).map((value, idx) => (
-                                            <td key={idx}>{value}</td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <div className="container mt-5">
+      <h2>Dashboard</h2>
+      <SearchBar onSearch={handleSearch} />
+      <div style={{ height: 600, width: '100%' }}>
+        <DataGrid
+          rows={studentsData}
+          columns={columns}
+          pageSize={10}
+          onRowClick={handleRowClick} // Redirect on row click
+        />
+      </div>
+    </div>
+  );
 }
 
 export default Dashboard;

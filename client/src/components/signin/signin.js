@@ -17,7 +17,7 @@ function Signin() {
 
     useEffect(() => {
         if (loginUserStatus && currentUser) {
-            navigate("/dashboard");
+            navigate("/home");
         }
     }, [loginUserStatus, navigate, currentUser]);
 

@@ -71,7 +71,6 @@ facultyApp.post(
 // Add a new POST route to store multiple documents into studentsdatacollection
 facultyApp.post(
   "/upload",
-  verifyToken,
   expressAsyncHandler(async (req, res) => {
     try {
       console.log('Hello')
@@ -79,8 +78,6 @@ facultyApp.post(
       if (!Array.isArray(studentDataArray)) {
         return res.status(400).send({ message: 'Invalid data format. Expected an array of objects.' });
       }
-      console.log(studentDataArray)
-      console.log("frgdh")
       await studentsdatacollection.deleteMany({}); 
       await studentsdatacollection.insertMany(studentDataArray);
       res.send({ message: "Student data stored successfully", });
@@ -148,6 +145,25 @@ facultyApp.get(
     }
   })
 );
+facultyApp.get(
+  "/student/:id",
+  expressAsyncHandler(async (req, res) => {
+    const studentId = req.params.id;
 
+    try {
+      const student = await studentsdatacollection.findOne({ id: parseInt(studentId) });
+
+      if (!student) {
+        res.status(404).send({ message: "Student not found" });
+        return;
+      }
+
+      res.json(student);
+    } catch (error) {
+      console.error("Error while fetching student data:", error);
+      res.status(500).send({ message: "Internal Server Error" });
+    }
+  })
+);
 
 module.exports = facultyApp;
